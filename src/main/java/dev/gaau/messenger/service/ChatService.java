@@ -108,5 +108,23 @@ public class ChatService {
         // 6. Message 엔티티를 응답 DTO로 변환하여 반환
         return chatMapper.messageToMessageDto(savedMessage);
     }
+
+    public List<MessageDto> getMessages(Long loggedInMemberId, Long chatRoomId) {
+        // 1. 로그인한 사용자의 ID로 Member 엔티티 조회
+        Member loggedInMember = memberRepository.findById(loggedInMemberId).orElseThrow(
+                () -> new RuntimeException("cannot find member with id : " + loggedInMemberId)
+        );
+
+        // 2. 채팅방 ID로 ChatRoom 엔티티 조회
+        ChatRoom savedChatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
+                () -> new RuntimeException("cannot find chat room with id : " + chatRoomId)
+        );
+
+        // 3. 조회된 채팅방에서 message list 조회
+        List<Message> messages = savedChatRoom.getMessages();
+
+        // 4. Message list를 응답 DTO로 변환하여 반환
+        return messages.stream().map(chatMapper::messageToMessageDto).toList();
+    }
 }
 
