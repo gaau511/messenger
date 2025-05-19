@@ -3,8 +3,11 @@ package dev.gaau.messenger.service;
 import dev.gaau.messenger.domain.ChatRoom;
 import dev.gaau.messenger.domain.Member;
 import dev.gaau.messenger.domain.MemberChatRoom;
+import dev.gaau.messenger.domain.Message;
 import dev.gaau.messenger.dto.request.ChatRoomCreateRequestDto;
+import dev.gaau.messenger.dto.request.MessageRequestDto;
 import dev.gaau.messenger.dto.response.ChatRoomDto;
+import dev.gaau.messenger.dto.response.MessageDto;
 import dev.gaau.messenger.mapper.ChatMapper;
 import dev.gaau.messenger.repository.ChatRoomRepository;
 import dev.gaau.messenger.repository.MemberChatRoomRepository;
@@ -13,6 +16,7 @@ import dev.gaau.messenger.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +29,7 @@ public class ChatService {
     private final MemberRepository memberRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MemberChatRoomRepository memberChatRoomRepository;
+    private final MessageRepository messageRepository;
     private final ChatMapper chatMapper;
 
     public ChatRoomDto createChatRoom(Long loggedInMemberId, ChatRoomCreateRequestDto chatRoomCreateRequestDto) {
@@ -77,6 +82,28 @@ public class ChatService {
 
         // 9. ChatRoom 엔티티를 DTO로 변환하여 반환
         return chatMapper.chatRoomToChatRoomDto(savedChatRoom);
+    }
+
+    public MessageDto sendMessage(Long loggedInMemberId, Long chatRoomId, MessageRequestDto messageRequestDto) {
+
+        // 1. 로그인한 사용자의 ID로 Member 엔티티 조회
+        Member loggedInMember = memberRepository.findById(loggedInMemberId).orElseThrow(
+                () -> new RuntimeException("cannot find member with id : " + loggedInMemberId)
+        );
+
+        // 2. 채팅방 ID로 ChatRoom 엔티티 조회
+        ChatRoom savedChatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
+                () -> new RuntimeException("cannot find chat room with id : " + chatRoomId)
+        );
+
+        // 3. 요청 DTO로부터 message 생성
+        Message message = chatMapper.toMessage(messageRequestDto, savedChatRoom, loggedInMember);
+
+        // 4. message 저장
+        Message savedMessage = messageRepository.save(message);
+
+        // 5. Message 엔티티를 응답 DTO로 변환하여 반환
+        return chatMapper.messageToMessageDto(savedMessage);
     }
 }
 
