@@ -21,9 +21,8 @@ public class Message {
     @Column(name = "type", nullable = false)
     private String type;
 
-    @CreationTimestamp
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "read_count", nullable = false)
     private Integer readCount;
