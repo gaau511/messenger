@@ -102,7 +102,10 @@ public class ChatService {
         // 4. message 저장
         Message savedMessage = messageRepository.save(message);
 
-        // 5. Message 엔티티를 응답 DTO로 변환하여 반환
+        // 5. ChatRoom에 저장된 메시지 저장
+        savedChatRoom.getMessages().add(savedMessage);
+
+        // 6. Message 엔티티를 응답 DTO로 변환하여 반환
         return chatMapper.messageToMessageDto(savedMessage);
     }
 }
