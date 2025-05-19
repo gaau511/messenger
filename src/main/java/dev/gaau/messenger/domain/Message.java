@@ -39,4 +39,13 @@ public class Message {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @Builder
+    public Message(String type, Integer readCount, String contents, ChatRoom chatRoom, Member member) {
+        this.type = type;
+        this.readCount = readCount;
+        this.contents = contents;
+        this.chatRoom = chatRoom;
+        this.member = member;
+    }
 }
