@@ -29,9 +29,8 @@ public class ChatRoom {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @CreationTimestamp
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "chatRoom")
     private List<Message> messages = new ArrayList<>();

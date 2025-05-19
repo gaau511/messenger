@@ -42,9 +42,8 @@ public class Member {
     @Column(name = "birth", nullable = false)
     private LocalDate birth;
 
-    @CreationTimestamp
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "member")
     private List<MemberChatRoom> memberChatRooms = new ArrayList<>();
