@@ -2,8 +2,10 @@ package dev.gaau.messenger.domain;
 
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @Table(name = "member_chat_room")
 @NoArgsConstructor
