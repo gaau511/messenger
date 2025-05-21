@@ -37,4 +37,33 @@ class ChatServiceTest {
                 .isInstanceOf(RuntimeException.class);
 
     }
+
+    @Test
+    void sendMessage_ShouldSuccess() {
+        MessageRequestDto testDto = new MessageRequestDto("USER", "Hi! How are you doing?");
+        MessageDto messageDto = chatService.sendMessage(1L, 1L, testDto);
+        assertThat(messageDto.getChatRoomId()).isEqualTo(1L);
+        assertThat(messageDto.getContents()).isEqualTo("Hi! How are you doing?");
+        assertThat(messageDto.getMemberId()).isEqualTo(1L);
+        assertThat(messageDto.getReadCount()).isEqualTo(3);
+    }
+
+    @Test
+    void sendMessage_ShouldFail_WhenChatRoomIsNotExist() {
+        MessageRequestDto testDto = new MessageRequestDto("USER", "Hi! How are you doing?");
+        assertThatThrownBy(
+                () -> chatService.sendMessage(1L, 10L, testDto)
+        )
+                .isInstanceOf(RuntimeException.class);
+    }
+
+    @Test
+    void sendMessage_ShouldFail_WhenSenderIsNotParticipant() {
+        MessageRequestDto testDto = new MessageRequestDto("USER", "Hi! How are you doing?");
+        assertThatThrownBy(
+                () -> chatService.sendMessage(4L, 1L, testDto)
+        )
+                .isInstanceOf(RuntimeException.class);
+    }
+
 }
