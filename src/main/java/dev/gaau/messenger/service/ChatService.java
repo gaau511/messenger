@@ -96,16 +96,21 @@ public class ChatService {
                 () -> new RuntimeException("cannot find chat room with id : " + chatRoomId)
         );
 
-        // 3. 요청 DTO로부터 message 생성
+        // 3. 로그인한 사용자가 채팅방의 participants 인지 확인
+        if (!memberChatRoomRepository.existsByMemberAndChatRoom(loggedInMember,savedChatRoom)) {
+            throw new RuntimeException("Member " + loggedInMemberId + " is not the participant of Chat Room " + chatRoomId);
+        }
+
+        // 4. 요청 DTO로부터 message 생성
         Message message = chatMapper.toMessage(messageRequestDto, savedChatRoom, loggedInMember);
 
-        // 4. message 저장
+        // 5. message 저장
         Message savedMessage = messageRepository.save(message);
 
-        // 5. ChatRoom에 저장된 메시지 저장
+        // 6. ChatRoom에 저장된 메시지 저장
         savedChatRoom.getMessages().add(savedMessage);
 
-        // 6. Message 엔티티를 응답 DTO로 변환하여 반환
+        // 7. Message 엔티티를 응답 DTO로 변환하여 반환
         return chatMapper.messageToMessageDto(savedMessage);
     }
 
@@ -120,10 +125,15 @@ public class ChatService {
                 () -> new RuntimeException("cannot find chat room with id : " + chatRoomId)
         );
 
-        // 3. 조회된 채팅방에서 message list 조회
+        // 3. 로그인한 사용자가 채팅방의 participants 인지 확인
+        if (!memberChatRoomRepository.existsByMemberAndChatRoom(loggedInMember,savedChatRoom)) {
+            throw new RuntimeException("Member " + loggedInMemberId + " is not the participant of Chat Room " + chatRoomId);
+        }
+
+        // 4. 조회된 채팅방에서 message list 조회
         List<Message> messages = savedChatRoom.getMessages();
 
-        // 4. Message list를 응답 DTO로 변환하여 반환
+        // 5. Message list를 응답 DTO로 변환하여 반환
         return messages.stream().map(chatMapper::messageToMessageDto).toList();
     }
 }
