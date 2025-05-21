@@ -8,14 +8,22 @@ import dev.gaau.messenger.dto.response.ChatRoomDto;
 import dev.gaau.messenger.dto.response.MessageDto;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class ChatMapper {
 
     public ChatRoomDto chatRoomToChatRoomDto(ChatRoom chatRoom) {
+
+        List<Long> participantsId = chatRoom.getMemberChatRooms().stream().map(
+                memberChatRoom -> memberChatRoom.getMember().getId()
+        ).toList();
+
         return ChatRoomDto.builder()
                 .id(chatRoom.getId())
                 .createdAt(chatRoom.getCreatedAt())
                 .title(chatRoom.getTitle())
+                .participantsId(participantsId)
                 .build();
     }
 
