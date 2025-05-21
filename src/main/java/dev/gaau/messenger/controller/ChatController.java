@@ -33,4 +33,21 @@ public class ChatController {
 
     }
 
+    /**
+     *
+     * 메시지 전송 API
+     *
+     * @param roomId
+     * @param messageRequestDto
+     * @return
+     */
+    @PostMapping("/1/{roomId}")
+     ResponseEntity<MessageDto> sendMessage(@AuthenticationPrincipal Member loggedInMember,
+                                            @PathVariable("roomId") Long roomId,
+                                            @RequestBody MessageRequestDto messageRequestDto) {
+
+        MessageDto newMessage = chatService.sendMessage(loggedInMember.getId(), roomId,messageRequestDto);
+        return ResponseEntity.ok(newMessage);
+    }
+
 }
