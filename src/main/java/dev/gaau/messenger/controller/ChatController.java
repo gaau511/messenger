@@ -50,4 +50,18 @@ public class ChatController {
         return ResponseEntity.ok(newMessage);
     }
 
+    /**
+     *
+     * 채팅방 메시지 조회 API
+     *
+     * @param roomId
+     * @return
+     */
+    @GetMapping("/1/{roomId}")
+    ResponseEntity<List<MessageDto>> lookUpMessages(@AuthenticationPrincipal Member loggedInMember,
+                                                    @PathVariable("roomId") Long roomId) {
+        List<MessageDto> messageList = chatService.getMessages(loggedInMember.getId(), roomId);
+        return ResponseEntity.ok(messageList);
+
+    }
 }
