@@ -66,4 +66,37 @@ class ChatServiceTest {
                 .isInstanceOf(RuntimeException.class);
     }
 
+
+    @Test
+    void getMessages_ShouldSuccess() {
+        List<MessageDto> messages = chatService.getMessages(1L, 1L);
+        assertThat(messages).isNotNull();
+    }
+
+    @Test
+    void getMessages_ShouldFail_WhenMemberIsNotParticipant() {
+        assertThatThrownBy(
+                () -> chatService.getMessages(4L, 1L)
+        )
+                .isInstanceOf(RuntimeException.class);
+
+    }
+
+    @Test
+    void getMessages_ShouldFail_WhenMemberIsNotExist() {
+        assertThatThrownBy(
+                () -> chatService.getMessages(10L, 1L)
+        )
+                .isInstanceOf(RuntimeException.class);
+
+    }
+
+    @Test
+    void getMessages_ShouldFail_WhenChatRoomIsNotExist() {
+        assertThatThrownBy(
+                () -> chatService.getMessages(1L, 10L)
+        )
+                .isInstanceOf(RuntimeException.class);
+
+    }
 }
