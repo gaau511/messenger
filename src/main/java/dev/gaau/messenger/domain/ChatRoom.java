@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,6 +31,11 @@ public class ChatRoom {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Setter
+    @OneToOne
+    @JoinColumn(name = "last_message_id")
+    private Message lastMessage;
 
     @OneToMany(mappedBy = "chatRoom")
     private List<Message> messages = new ArrayList<>();

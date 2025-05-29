@@ -117,7 +117,10 @@ public class ChatService {
         // 6. ChatRoom에 저장된 메시지 저장
         savedChatRoom.getMessages().add(savedMessage);
 
-        // 7. Message 엔티티를 응답 DTO로 변환하여 반환
+        // 8. ChatRoom에 마지막 메시지 ID 업데이트
+        savedChatRoom.setLastMessage(savedMessage);
+
+        // 9. Message 엔티티를 응답 DTO로 변환하여 반환
         return chatMapper.messageToMessageDto(savedMessage);
     }
 
