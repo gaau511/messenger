@@ -7,6 +7,7 @@ import dev.gaau.messenger.domain.Message;
 import dev.gaau.messenger.dto.request.ChatRoomCreateRequestDto;
 import dev.gaau.messenger.dto.request.MessageRequestDto;
 import dev.gaau.messenger.dto.response.ChatRoomDto;
+import dev.gaau.messenger.dto.response.ChatRoomSummaryDto;
 import dev.gaau.messenger.dto.response.MessageDto;
 import dev.gaau.messenger.mapper.ChatMapper;
 import dev.gaau.messenger.repository.ChatRoomRepository;
@@ -16,7 +17,6 @@ import dev.gaau.messenger.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,9 +55,12 @@ public class ChatService {
         // 5. 로그인한 사용자도 참여자 목록에 추가
         participants.add(loggedInMember);
 
+        // 6. 채팅방 이름 생성
+        String title = chatRoomCreateRequestDto.getTitle() == null ? makeDefaultChatRoomTitle(participants) : chatRoomCreateRequestDto.getTitle();
+
         // 6. ChatRoom 엔티티 생성
         ChatRoom chatRoom = ChatRoom.builder()
-                .title(chatRoomCreateRequestDto.getTitle())
+                .title(title)
                 .build();
 
         // 7. ChatRoom 저장
@@ -82,6 +85,10 @@ public class ChatService {
 
         // 9. ChatRoom 엔티티를 DTO로 변환하여 반환
         return chatMapper.chatRoomToChatRoomDto(savedChatRoom);
+    }
+
+    private String makeDefaultChatRoomTitle(List<Member> participants) {
+        return String.join(", ", participants.stream().map(Member::getName).toList());
     }
 
     public MessageDto sendMessage(Long loggedInMemberId, Long chatRoomId, MessageRequestDto messageRequestDto) {
