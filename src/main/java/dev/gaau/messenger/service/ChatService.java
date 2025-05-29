@@ -117,10 +117,10 @@ public class ChatService {
         // 6. ChatRoom에 저장된 메시지 저장
         savedChatRoom.getMessages().add(savedMessage);
 
-        // 8. ChatRoom에 마지막 메시지 ID 업데이트
+        // 7. ChatRoom에 마지막 메시지 ID 업데이트
         savedChatRoom.setLastMessage(savedMessage);
 
-        // 9. Message 엔티티를 응답 DTO로 변환하여 반환
+        // 8. Message 엔티티를 응답 DTO로 변환하여 반환
         return chatMapper.messageToMessageDto(savedMessage);
     }
 
@@ -146,5 +146,39 @@ public class ChatService {
         // 5. Message list를 응답 DTO로 변환하여 반환
         return messages.stream().map(chatMapper::messageToMessageDto).toList();
     }
+
+    public List<ChatRoomSummaryDto> getChatRoomsByMemberId(Long loggedInMemberId) {
+        // 1. 로그인한 사용자의 ID로 Member 엔티티 조회
+        Member loggedInMember = memberRepository.findById(loggedInMemberId).orElseThrow(
+                () -> new RuntimeException("cannot find member with id : " + loggedInMemberId)
+        );
+
+        List<ChatRoomSummaryDto> chatRoomSummaryDtoList = new ArrayList<>();
+        // 2. 회원이 참여하고 있는 채팅방 조회
+        for (MemberChatRoom mcr : loggedInMember.getMemberChatRooms()) {
+
+            ChatRoomSummaryDto chatRoomSummaryDto = new ChatRoomSummaryDto();
+            List<String> participantsName = new ArrayList<>();
+            ChatRoom chatRoom = mcr.getChatRoom();
+
+            // 2-1. 해당 채팅방의 참여자 이름 조회
+            for(MemberChatRoom mcr2 : chatRoom.getMemberChatRooms()) {
+                participantsName.add(mcr2.getMember().getName());
+            }
+
+            // 2-2 chatRoomSummaryDto 생성
+            chatRoomSummaryDto.setId(chatRoom.getId());
+            chatRoomSummaryDto.setParticipantsName(participantsName);
+            chatRoomSummaryDto.setTitle(chatRoom.getTitle());
+            if (chatRoom.getLastMessage() != null) {
+                chatRoomSummaryDto.setLastMessage(chatRoom.getLastMessage().getContents());
+                chatRoomSummaryDto.setLastMessageTime(chatRoom.getLastMessage().getCreatedAt());
+            }
+            chatRoomSummaryDtoList.add(chatRoomSummaryDto);
+        }
+
+        return chatRoomSummaryDtoList;
+    }
+
 }
 
