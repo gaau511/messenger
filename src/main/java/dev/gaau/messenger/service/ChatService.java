@@ -180,5 +180,7 @@ public class ChatService {
         return chatRoomSummaryDtoList;
     }
 
+    public List<Member> getMembers() {
+        return memberRepository.findAll();
+    }
 }
-
