@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>채팅방 생성</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6 flex justify-center items-center min-h-screen">
+<div class="w-full max-w-md bg-white rounded-2xl shadow-md p-6">
+    <h1 class="text-2xl font-bold mb-6 text-center">채팅방 생성</h1>
+
+    <form th:action="@{/view/chat/create}" method="post" class="flex flex-col h-[400px]">
+
+        <!-- 멤버 목록 (스크롤 가능) -->
+        <div class="flex-1 overflow-y-auto border border-gray-300 rounded-md p-4 mb-6">
+            <div th:each="member : ${members}" class="flex items-center mb-3">
+                <input
+                        type="checkbox"
+                        th:id="'member-' + ${member.id}"
+                        th:name="memberIds"
+                        th:value="${member.id}"
+                        class="mr-3"
+                />
+                <label th:for="'member-' + ${member.id}" class="cursor-pointer select-none">
+                    <span class="font-medium text-gray-900" th:text="${member.name}">이름</span>
+                    <span class="ml-2 text-gray-400 text-sm" th:text="${member.username}">(username)</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 채팅방 이름 입력 -->
+        <div class="mb-4">
+            <label for="title" class="block mb-1 font-semibold text-gray-700">채팅방 이름 (선택)</label>
+            <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    placeholder="채팅방 이름을 입력하세요"
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+        </div>
+
+        <!-- 제출 버튼 -->
+        <button
+                type="submit"
+                class="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
+        >
+            생성하기
+        </button>
+    </form>
+</div>
+</body>
+</html>
