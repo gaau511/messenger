@@ -33,4 +33,10 @@ public class ChatController {
         return "redirect:room/" + chatRoom.getId();
     }
 
+    @GetMapping("/list")
+    public String lookUpChatRoomList(Model model) {
+        List<ChatRoomSummaryDto> chatRooms = chatService.getChatRoomsByMemberId(temporaryMemberId);
+        model.addAttribute("chatRooms", chatRooms);
+        return "chat/list";
+    }
 }

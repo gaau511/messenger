@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>채팅방 목록</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+<div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-md p-6">
+  <h1 class="text-2xl font-bold mb-4">채팅방 목록</h1>
+
+  <a th:href="@{/view/chat/create}"
+     class="inline-block mb-6 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-blue-600 transition">
+    채팅방 생성하기
+  </a>
+
+  <div class="divide-y divide-gray-200">
+    <div th:each="room : ${chatRooms}" class="py-4">
+      <a th:href="@{/view/chat/room/{id}(id=${room.id})}" class="flex items-center hover:bg-gray-50 p-4 rounded-lg transition">
+<!--        &lt;!&ndash; 대표 이미지 &ndash;&gt;-->
+<!--        <img th:src="${room.imageUrl}" alt="대표 이미지" class="w-12 h-12 rounded-full mr-4 object-cover"/>-->
+
+        <!-- 채팅방 정보 -->
+        <div class="flex-1">
+          <div class="flex justify-between items-center">
+            <!-- 채팅방 이름 -->
+            <h2 class="text-lg font-semibold text-gray-800" th:text="${room.title}">채팅방 이름</h2>
+            <!-- 마지막 메시지 시간 -->
+            <span class="text-sm text-gray-500" th:text="${#temporals.format(room.lastMessageTime, 'yyyy-MM-dd HH:mm')}">시간</span>
+          </div>
+          <!-- 마지막 메시지 미리보기 -->
+          <p class="text-sm text-gray-600 truncate mt-1" th:text="${room.lastMessage}">마지막 메시지 미리보기</p>
+        </div>
+
+<!--        &lt;!&ndash; 안 읽은 메시지 배지 &ndash;&gt;-->
+<!--        <div th:if="${room.unreadCount > 0}" class="ml-4">-->
+<!--                    <span class="bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">-->
+<!--                        <span th:text="${room.unreadCount}">3</span>-->
+<!--                    </span>-->
+<!--        </div>-->
+      </a>
+    </div>
+  </div>
+
+  <div th:if="${#lists.isEmpty(chatRooms)}" class="text-gray-500 text-center py-10">
+    참여 중인 채팅방이 없습니다.
+  </div>
+</div>
+</body>
+</html>
