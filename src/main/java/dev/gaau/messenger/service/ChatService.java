@@ -183,4 +183,14 @@ public class ChatService {
     public List<Member> getMembers() {
         return memberRepository.findAll();
     }
+
+    public ChatRoomDto getChatRoomById(Long chatRoomId) {
+        // 채팅방 ID로 ChatRoom 엔티티 조회
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
+                () -> new RuntimeException("cannot find chat room with id : " + chatRoomId)
+        );
+
+        return chatMapper.chatRoomToChatRoomDto(chatRoom);
+    }
 }
+
