@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>채팅방</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex flex-col h-screen">
+
+<!-- 상단 헤더 -->
+<header class="bg-white shadow-md p-4 flex items-center">
+    <a href="/view/chat" class="text-blue-500 hover:underline mr-4">&larr; 목록으로</a>
+    <h1 class="text-xl font-semibold" th:text="${chatRoom.title}">채팅방 이름</h1>
+</header>
+
+<!-- 메시지 영역 -->
+<main class="flex-1 overflow-y-auto p-6 space-y-4">
+    <div th:each="msg : ${messages}">
+        <!-- 내 메시지 -->
+        <div if="${msg.memberId} == ${loggedInMemberId}"
+             class="max-w-xs bg-blue-500 text-white p-3 rounded-lg rounded-tr-none mr-0 mb-2 ml-auto">
+            <p th:text="${msg.contents}">내 메시지 내용</p>
+            <span class="block text-xs text-white/80 mt-1 text-right"
+                  th:text="${#temporals.format(msg.createdAt, 'HH:mm')}">13:45</span>
+        </div>
+        <!-- 상대 메시지 -->
+        <div th:if="${msg.memberId} != ${loggedInMemberId}"
+             class="max-w-xs bg-gray-200 text-gray-900 p-3 rounded-lg rounded-tl-none ml-0 mb-2">
+            <p th:text="${msg.contents}">상대 메시지 내용</p>
+            <span class="block text-xs text-gray-600 mt-1 text-right"
+                  th:text="${#temporals.format(msg.createdAt, 'HH:mm')}">13:46</span>
+        </div>
+    </div>
+</main>
+
+<!-- 입력 폼 -->
+<footer class="bg-white p-4">
+    <form th:action="@{/view/chat/room/{id}(id=${chatRoom.id})}" method="post" class="flex items-center space-x-2">
+        <input type="text" name="contents" required
+               placeholder="메시지를 입력하세요"
+               class="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+        <input type="hidden" name = "type" value = "USER">
+        <button type="submit"
+                class="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition">
+            전송
+        </button>
+    </form>
+</footer>
+
+</body>
+</html>

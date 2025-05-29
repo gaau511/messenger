@@ -33,6 +33,28 @@ public class ChatController {
         return "redirect:room/" + chatRoom.getId();
     }
 
+    @GetMapping("/room/{chatRoomId}")
+    public String chatRoomPage(Model model,
+                               @PathVariable("chatRoomId") Long chatRoomId) {
+
+        ChatRoomDto chatRoom = chatService.getChatRoomById(chatRoomId);
+        List<MessageDto> messages = chatService.getMessages(temporaryMemberId, chatRoomId);
+
+        model.addAttribute("chatRoom", chatRoom);
+        model.addAttribute("messages", messages);
+        model.addAttribute("loggedInMemberId", temporaryMemberId);
+        return "chat/room";
+    }
+
+    @PostMapping("/room/{chatRoomId}")
+    public String sendMessage(@PathVariable("chatRoomId") Long chatRoomId,
+                              @ModelAttribute MessageRequestDto messageRequestDto) {
+        MessageDto messageDto = chatService.sendMessage(temporaryMemberId, chatRoomId, messageRequestDto);
+
+        return "redirect:" + chatRoomId;
+    }
+
+
     @GetMapping("/list")
     public String lookUpChatRoomList(Model model) {
         List<ChatRoomSummaryDto> chatRooms = chatService.getChatRoomsByMemberId(temporaryMemberId);
