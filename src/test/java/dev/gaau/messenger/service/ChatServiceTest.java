@@ -30,6 +30,13 @@ class ChatServiceTest {
     }
 
     @Test
+    void createChatRoom_ShouldSuccess_WhenTitleIsNull() {
+        ChatRoomCreateRequestDto testDto = new ChatRoomCreateRequestDto(null, List.of(2L, 3L));
+        ChatRoomDto chatRoomDto = chatService.createChatRoom(1L, testDto);
+        assertThat(chatRoomDto.getTitle()).contains("Huiryeong");
+    }
+
+    @Test
     void createChatRoom_ShouldFail_WhenMemberIsNotExist() {
         ChatRoomCreateRequestDto testDto = new ChatRoomCreateRequestDto("ChatRoom for test", List.of(8L, 9L));
 
