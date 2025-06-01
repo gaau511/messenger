@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -24,8 +25,8 @@ public class Message {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "read_count", nullable = false)
-    private Integer readCount;
+    @Column(name = "unread_count", nullable = false)
+    private Integer unreadCount;
 
     @Lob
     @Column(name = "contents", columnDefinition = "TEXT", nullable = false)
@@ -35,14 +36,14 @@ public class Message {
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
 
     @Builder
-    public Message(String type, Integer readCount, String contents, ChatRoom chatRoom, Member member) {
+    public Message(String type, Integer unreadCount, String contents, ChatRoom chatRoom, Member member) {
         this.type = type;
-        this.readCount = readCount;
+        this.unreadCount = unreadCount;
         this.contents = contents;
         this.chatRoom = chatRoom;
         this.member = member;
