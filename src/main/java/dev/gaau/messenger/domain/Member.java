@@ -51,6 +51,20 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
     private List<Message> messages = new ArrayList<>();
 
+
+    public void addChatRoom(ChatRoom chatRoom) {
+        MemberChatRoom mcr = new MemberChatRoom(this, chatRoom);
+        memberChatRooms.add(mcr);
+        chatRoom.getMemberChatRooms().add(mcr);
+    }
+
+
+    public void addMessage(Message message) {
+        messages.add(message);
+        message.setMember(this);
+    }
+
+
     @Builder
     public Member(String username, String password, String name, String gender, String email, String nickname, LocalDate birth) {
         this.username = username;
