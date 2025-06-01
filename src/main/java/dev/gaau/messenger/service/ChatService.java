@@ -44,7 +44,7 @@ public class ChatService {
         // 2. 요청 DTO로부터 참여자 ID 목록 추출
         List<Long> participantsIds = chatRoomCreateRequestDto.getMemberIds();
 
-        List<Member> participants = new ArrayList<>();
+        Set<Member> participants = new HashSet<>();
 
         // 4. 각 참여자 ID에 대해 Member 엔티티를 조회하여 participants 리스트에 추가
         participantsIds.forEach(memberId -> {
@@ -88,9 +88,10 @@ public class ChatService {
         return chatMapper.chatRoomToChatRoomDto(savedChatRoom);
     }
 
-    private String makeDefaultChatRoomTitle(List<Member> participants) {
+    private String makeDefaultChatRoomTitle(Set<Member> participants) {
         return String.join(", ", participants.stream().map(Member::getName).toList());
     }
+
 
     public MessageDto sendMessage(Long loggedInMemberId, Long chatRoomId, MessageRequestDto messageRequestDto) {
 
@@ -120,15 +121,14 @@ public class ChatService {
         int unreadCount = savedChatRoom.getMemberChatRooms().size();
         message.setUnreadCount(unreadCount);
 
-        // 6. message 영속
+        // 7. message 영속
         Message savedMessage = messageRepository.save(message);
 
 
-
-        // 7. ChatRoom에 마지막 메시지 ID 업데이트
+        // 8. ChatRoom에 마지막 메시지 ID 업데이트
         savedChatRoom.setLastMessage(savedMessage);
 
-        // 8. Message 엔티티를 응답 DTO로 변환하여 반환
+        // 9. Message 엔티티를 응답 DTO로 변환하여 반환
         return chatMapper.messageToMessageDto(savedMessage);
     }
 
