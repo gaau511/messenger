@@ -25,6 +25,7 @@ public class Message {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Setter
     @Column(name = "unread_count", nullable = false)
     private Integer unreadCount;
 
@@ -32,20 +33,19 @@ public class Message {
     @Column(name = "contents", columnDefinition = "TEXT", nullable = false)
     private String contents;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
 
     @Builder
-    public Message(String type, Integer unreadCount, String contents, ChatRoom chatRoom, Member member) {
+    public Message(String type, String contents) {
         this.type = type;
-        this.unreadCount = unreadCount;
         this.contents = contents;
-        this.chatRoom = chatRoom;
-        this.member = member;
     }
 }

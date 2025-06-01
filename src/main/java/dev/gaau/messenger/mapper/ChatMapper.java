@@ -27,14 +27,10 @@ public class ChatMapper {
                 .build();
     }
 
-    public Message toMessage(MessageRequestDto messageRequestDto, ChatRoom chatRoom,
-                             Member member) {
+    public Message messageRequestDtoToMessage(MessageRequestDto messageRequestDto) {
         return Message.builder()
                 .type(messageRequestDto.getType())
                 .contents(messageRequestDto.getContents())
-                .chatRoom(chatRoom)
-                .member(member)
-                .readCount(chatRoom.getMemberChatRooms().size())
                 .build();
     }
 

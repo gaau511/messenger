@@ -19,7 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -42,7 +44,6 @@ public class ChatService {
         // 2. 요청 DTO로부터 참여자 ID 목록 추출
         List<Long> participantsIds = chatRoomCreateRequestDto.getMemberIds();
 
-        // 3. 참여자들을 담을 리스트 생성
         List<Member> participants = new ArrayList<>();
 
         // 4. 각 참여자 ID에 대해 Member 엔티티를 조회하여 participants 리스트에 추가
@@ -109,13 +110,20 @@ public class ChatService {
         }
 
         // 4. 요청 DTO로부터 message 생성
-        Message message = chatMapper.toMessage(messageRequestDto, savedChatRoom, loggedInMember);
+        Message message = chatMapper.messageRequestDtoToMessage(messageRequestDto);
 
-        // 5. message 저장
+        // 5. ChatRoom과 Member에 메시지 저장
+        savedChatRoom.addMessage(message);
+        loggedInMember.addMessage(message);
+
+        // 6. UnreadCount 설정
+        int unreadCount = savedChatRoom.getMemberChatRooms().size();
+        message.setUnreadCount(unreadCount);
+
+        // 6. message 영속
         Message savedMessage = messageRepository.save(message);
 
-        // 6. ChatRoom에 저장된 메시지 저장
-        savedChatRoom.getMessages().add(savedMessage);
+
 
         // 7. ChatRoom에 마지막 메시지 ID 업데이트
         savedChatRoom.setLastMessage(savedMessage);
