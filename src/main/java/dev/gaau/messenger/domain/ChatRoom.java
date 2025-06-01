@@ -32,14 +32,23 @@ public class ChatRoom {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    public void addMessage(Message message) {
+        messages.add(message);
+        message.setChatRoom(this);
+    }
+
+    public void addMember(Member member) {
+        member.addChatRoom(this);
+    }
+
     @Setter
     @OneToOne
     @JoinColumn(name = "last_message_id")
     private Message lastMessage;
 
-    @OneToMany(mappedBy = "chatRoom")
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.PERSIST)
     private List<Message> messages = new ArrayList<>();
 
-    @OneToMany(mappedBy = "chatRoom")
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.PERSIST)
     private List<MemberChatRoom> memberChatRooms = new ArrayList<>();
 }
