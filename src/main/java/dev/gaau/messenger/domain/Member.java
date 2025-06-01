@@ -1,5 +1,6 @@
 package dev.gaau.messenger.domain;
 
+import dev.gaau.messenger.repository.MemberChatRoomRepository;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -44,8 +45,11 @@ public class Member {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
     private List<MemberChatRoom> memberChatRooms = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
+    private List<Message> messages = new ArrayList<>();
 
     @Builder
     public Member(String username, String password, String name, String gender, String email, String nickname, LocalDate birth) {
