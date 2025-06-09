@@ -49,7 +49,7 @@ public class ChatController {
     @PostMapping("/room/{chatRoomId}")
     public String sendMessage(@PathVariable("chatRoomId") Long chatRoomId,
                               @ModelAttribute MessageRequestDto messageRequestDto) {
-        MessageDto messageDto = chatService.sendMessage(temporaryMemberId, chatRoomId, messageRequestDto);
+        MessageDto messageDto = chatService.sendMessage(messageRequestDto);
 
         return "redirect:" + chatRoomId;
     }
