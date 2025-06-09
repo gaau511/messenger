@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>채팅방</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col h-screen">
+
+<!-- 상단 헤더 -->
+<header class="bg-white shadow-md p-4 flex items-center">
+    <a href="/view/chat" class="text-blue-500 hover:underline mr-4">&larr; 목록으로</a>
+    <h1 class="text-xl font-semibold" th:text="${chatRoom.title}">채팅방 이름</h1>
+</header>
+
+<!-- 메시지 영역 -->
+<main id="message-list" class="flex-1 overflow-y-auto p-6 space-y-4">
+    <div th:each="msg : ${messages}">
+        <!-- 내 메시지 -->
+        <div th:if="${msg.memberId} == ${loggedInMemberId}"
+             class="max-w-xs bg-blue-500 text-white p-3 rounded-lg rounded-tr-none mr-0 mb-2 ml-auto">
+            <p th:text="${msg.contents}">내 메시지 내용</p>
+            <span class="block text-xs text-white/80 mt-1 text-right"
+                  th:text="${#temporals.format(msg.createdAt, 'HH:mm')}">13:45</span>
+        </div>
+        <!-- 상대 메시지 -->
+        <div th:if="${msg.memberId} != ${loggedInMemberId}"
+             class="max-w-xs bg-gray-200 text-gray-900 p-3 rounded-lg rounded-tl-none ml-0 mb-2">
+            <p th:text="${msg.contents}">상대 메시지 내용</p>
+            <span class="block text-xs text-gray-600 mt-1 text-right"
+                  th:text="${#temporals.format(msg.createdAt, 'HH:mm')}">13:46</span>
+        </div>
+    </div>
+</main>
+
+<!-- 입력 폼 -->
+<footer class="bg-white p-4">
+    <form class="flex items-center space-x-2">
+        <input id="new-message" type="text" name="contents" required
+               placeholder="메시지를 입력하세요"
+               class="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+        <input type="hidden" name = "type" value = "USER">
+        <button id = "send" type="submit"
+                class="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition">
+            전송
+        </button>
+    </form>
+</footer>
+</body>
+
+<script th:inline="javascript">
+
+    var chatRoomId = [[${chatRoom.id}]];
+    var loggedInMemberId = [[${loggedInMemberId}]];
+
+    const stompClient = new StompJs.Client({
+        brokerURL: 'ws://localhost:8080/ws'
+    });
+
+    window.onload = () => {
+        connect()
+    }
+
+    stompClient.onConnect = (frame) => {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/topic/chat/room/' + chatRoomId, (message) => {
+            var msgMemberId = JSON.parse(message.body).memberId;
+
+            if (msgMemberId === loggedInMemberId) {
+                showMyMessage(JSON.parse(message.body).contents);
+            } else {
+                showOtherMessage(JSON.parse(message.body).contents);
+            }
+        });
+    };
+
+    stompClient.onWebSocketError = (error) => {
+        console.error('Error with websocket', error);
+    };
+
+    stompClient.onStompError = (frame) => {
+        console.error('Broker reported error: ' + frame.headers['message']);
+        console.error('Additional details: ' + frame.body);
+    };
+
+    function connect() {
+        stompClient.activate();
+    }
+
+    function disconnect() {
+        stompClient.deactivate();
+        setConnected(false);
+        console.log("Disconnected");
+    }
+
+    function sendMessage() {
+        console.log("messageSent");
+        stompClient.publish({
+            destination: "/pub/chat/message",
+            body: JSON.stringify({  memberId: loggedInMemberId,
+                                    chatRoomId : chatRoomId,
+                                    type : "USER",
+                                    contents: $("#new-message").val()})
+        });
+    }
+
+    function showMyMessage(message) {
+        $("#message-list").append('<div class="max-w-xs bg-blue-500 text-white p-3 rounded-lg rounded-tr-none mr-0 mb-2 ml-auto">\n'
+            + '<p>' + message + '</p>\n'
+            + '<span class="block text-xs text-white/80 mt-1 text-right">13:46</span>\n'
+            + '</div>\n');
+    }
+
+    function showOtherMessage(message) {
+        $("#message-list").append('<div class="max-w-xs bg-gray-200 text-gray-900 p-3 rounded-lg rounded-tl-none ml-0 mb-2">\n'
+            + '<p>' + message + '</p>\n'
+            + '<span class="block text-xs text-gray-600 mt-1 text-right">13:46</span>\n'
+            + '</div>\n');
+    }
+
+    $(function () {
+        $("form").on('submit', (e) => e.preventDefault());
+        $( "#send" ).click(() => sendMessage());
+    });
+</script>
+</html>

@@ -81,21 +81,21 @@ public class ChatService {
     }
 
 
-    public MessageDto sendMessage(Long loggedInMemberId, Long chatRoomId, MessageRequestDto messageRequestDto) {
+    public MessageDto sendMessage(MessageRequestDto messageRequestDto) {
 
         // 1. 로그인한 사용자의 ID로 Member 엔티티 조회
-        Member loggedInMember = memberRepository.findById(loggedInMemberId).orElseThrow(
-                () -> new RuntimeException("cannot find member with id : " + loggedInMemberId)
+        Member loggedInMember = memberRepository.findById(messageRequestDto.getMemberId()).orElseThrow(
+                () -> new RuntimeException("cannot find member with id : " + messageRequestDto.getMemberId())
         );
 
         // 2. 채팅방 ID로 ChatRoom 엔티티 조회
-        ChatRoom savedChatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
-                () -> new RuntimeException("cannot find chat room with id : " + chatRoomId)
+        ChatRoom savedChatRoom = chatRoomRepository.findById(messageRequestDto.getChatRoomId()).orElseThrow(
+                () -> new RuntimeException("cannot find chat room with id : " + messageRequestDto.getChatRoomId())
         );
 
         // 3. 로그인한 사용자가 채팅방의 participants 인지 확인
         if (!memberChatRoomRepository.existsByMemberAndChatRoom(loggedInMember,savedChatRoom)) {
-            throw new RuntimeException("Member " + loggedInMemberId + " is not the participant of Chat Room " + chatRoomId);
+            throw new RuntimeException("Member " + loggedInMember.getId() + " is not the participant of Chat Room " + savedChatRoom.getId());
         }
 
         // 4. 요청 DTO로부터 message 생성
