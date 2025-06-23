@@ -1,7 +1,6 @@
 package dev.gaau.messenger.domain;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,7 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 public class ChatRoom {
 
-    @Builder
     public ChatRoom(String title) {
         this.title = title;
     }
