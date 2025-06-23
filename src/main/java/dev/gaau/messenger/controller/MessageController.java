@@ -18,10 +18,10 @@ public class MessageController {
     private final SimpMessageSendingOperations template;
     private final ChatService chatService;
 
-    @MessageMapping("/chat/message")
+    @MessageMapping("/chats/message")
     public void sendMessage(MessageRequestDto messageRequestDto) {
         MessageDto message = chatService.sendMessage(messageRequestDto);
-        template.convertAndSend("/topic/chat/room/" + message.getChatRoomId(), message);
+        template.convertAndSend("/topic/chats/" + message.getChatRoomInfo().getId(), message);
     }
 
 }

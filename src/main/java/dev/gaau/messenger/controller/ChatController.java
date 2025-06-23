@@ -2,7 +2,8 @@ package dev.gaau.messenger.controller;
 
 import dev.gaau.messenger.dto.request.ChatRoomCreateRequestDto;
 import dev.gaau.messenger.dto.request.MessageRequestDto;
-import dev.gaau.messenger.dto.response.ChatRoomDto;
+import dev.gaau.messenger.dto.response.ChatRoomDetailDto;
+import dev.gaau.messenger.dto.response.ChatRoomInfoDto;
 import dev.gaau.messenger.dto.response.ChatRoomSummaryDto;
 import dev.gaau.messenger.dto.response.MessageDto;
 import dev.gaau.messenger.service.ChatService;
@@ -14,51 +15,51 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/view/chat")
+@RequestMapping("/view/chats")
 @RequiredArgsConstructor
 public class ChatController {
 
     private final ChatService chatService;
-    private final Long temporaryMemberId = 1L;
 
-    @GetMapping("/create")
-    public String createChatRoomPage (Model model) {
+    @GetMapping
+    public String lookUpChatRoomList(Model model,
+                                     @PathVariable("memberId") Long memberId) {
+        List<ChatRoomSummaryDto> chatRooms = chatService.getChatRoomsByMemberId(memberId);
+        model.addAttribute("chatRooms", chatRooms);
+        return "chat/list";
+    }
+
+    @GetMapping("/create/{memberId}")
+    public String createChatRoomPage (Model model,
+                                      @PathVariable("memberId") Long memberId) {
         model.addAttribute("members", chatService.getMembers());
+        model.addAttribute("loggedInMemberId", memberId);
         return "chat/create";
     }
 
     @PostMapping("/create")
     public String createChatRoom(@ModelAttribute ChatRoomCreateRequestDto chatRoomCreateRequestDto) {
-        ChatRoomDto chatRoom = chatService.createChatRoom(temporaryMemberId, chatRoomCreateRequestDto);
-        return "redirect:room/" + chatRoom.getId();
+        ChatRoomInfoDto chatRoomInfo = chatService.createChatRoom(chatRoomCreateRequestDto);
+        return "redirect:room/" + chatRoomInfo.getId();
     }
 
-    @GetMapping("/room/{chatRoomId}")
+    @GetMapping("/{chatRoomId}/{memberId}")
     public String chatRoomPage(Model model,
+                               @PathVariable("memberId") Long memberId,
                                @PathVariable("chatRoomId") Long chatRoomId) {
 
-        ChatRoomDto chatRoom = chatService.getChatRoomById(chatRoomId);
-        List<MessageDto> messages = chatService.getMessages(temporaryMemberId, chatRoomId);
+        ChatRoomDetailDto chatRoomDetail = chatService.getChatRoomById(chatRoomId);
+        model.addAttribute("loggedInMemberId", memberId);
+        model.addAttribute("chatRoom", chatRoomDetail);
 
-        model.addAttribute("chatRoom", chatRoom);
-        model.addAttribute("messages", messages);
-        model.addAttribute("loggedInMemberId", temporaryMemberId);
         return "chat/room";
     }
 
-    @PostMapping("/room/{chatRoomId}")
+    @PostMapping("/{chatRoomId}")
     public String sendMessage(@PathVariable("chatRoomId") Long chatRoomId,
                               @ModelAttribute MessageRequestDto messageRequestDto) {
         MessageDto messageDto = chatService.sendMessage(messageRequestDto);
 
         return "redirect:" + chatRoomId;
-    }
-
-
-    @GetMapping("/list")
-    public String lookUpChatRoomList(Model model) {
-        List<ChatRoomSummaryDto> chatRooms = chatService.getChatRoomsByMemberId(temporaryMemberId);
-        model.addAttribute("chatRooms", chatRooms);
-        return "chat/list";
     }
 }

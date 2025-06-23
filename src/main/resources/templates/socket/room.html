@@ -11,22 +11,22 @@
 
 <!-- 상단 헤더 -->
 <header class="bg-white shadow-md p-4 flex items-center">
-    <a href="/view/chat" class="text-blue-500 hover:underline mr-4">&larr; 목록으로</a>
+    <a href="/view/chats" class="text-blue-500 hover:underline mr-4">&larr; 목록으로</a>
     <h1 class="text-xl font-semibold" th:text="${chatRoom.title}">채팅방 이름</h1>
 </header>
 
 <!-- 메시지 영역 -->
 <main id="message-list" class="flex-1 overflow-y-auto p-6 space-y-4">
-    <div th:each="msg : ${messages}">
+    <div th:each="msg : ${chatRoom.messages}">
         <!-- 내 메시지 -->
-        <div th:if="${msg.memberId} == ${loggedInMemberId}"
+        <div th:if="${msg.memberInfo.id} == ${loggedInMemberId}"
              class="max-w-xs bg-blue-500 text-white p-3 rounded-lg rounded-tr-none mr-0 mb-2 ml-auto">
             <p th:text="${msg.contents}">내 메시지 내용</p>
             <span class="block text-xs text-white/80 mt-1 text-right"
                   th:text="${#temporals.format(msg.createdAt, 'HH:mm')}">13:45</span>
         </div>
         <!-- 상대 메시지 -->
-        <div th:if="${msg.memberId} != ${loggedInMemberId}"
+        <div th:if="${msg.memberInfo.id} != ${loggedInMemberId}"
              class="max-w-xs bg-gray-200 text-gray-900 p-3 rounded-lg rounded-tl-none ml-0 mb-2">
             <p th:text="${msg.contents}">상대 메시지 내용</p>
             <span class="block text-xs text-gray-600 mt-1 text-right"
@@ -65,7 +65,7 @@
 
     stompClient.onConnect = (frame) => {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/chat/room/' + chatRoomId, (message) => {
+        stompClient.subscribe('/topic/chats/' + chatRoomId, (message) => {
             var msgMemberId = JSON.parse(message.body).memberId;
 
             if (msgMemberId === loggedInMemberId) {
@@ -98,8 +98,8 @@
     function sendMessage() {
         console.log("messageSent");
         stompClient.publish({
-            destination: "/pub/chat/message",
-            body: JSON.stringify({  memberId: loggedInMemberId,
+            destination: "/pub/chats/message",
+            body: JSON.stringify({  requesterId: loggedInMemberId,
                                     chatRoomId : chatRoomId,
                                     type : "USER",
                                     contents: $("#new-message").val()})
