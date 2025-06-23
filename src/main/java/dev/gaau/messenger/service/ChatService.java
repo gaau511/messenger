@@ -6,9 +6,7 @@ import dev.gaau.messenger.domain.MemberChatRoom;
 import dev.gaau.messenger.domain.Message;
 import dev.gaau.messenger.dto.request.ChatRoomCreateRequestDto;
 import dev.gaau.messenger.dto.request.MessageRequestDto;
-import dev.gaau.messenger.dto.response.ChatRoomDto;
-import dev.gaau.messenger.dto.response.ChatRoomSummaryDto;
-import dev.gaau.messenger.dto.response.MessageDto;
+import dev.gaau.messenger.dto.response.*;
 import dev.gaau.messenger.mapper.ChatMapper;
 import dev.gaau.messenger.repository.ChatRoomRepository;
 import dev.gaau.messenger.repository.MemberChatRoomRepository;
@@ -34,11 +32,11 @@ public class ChatService {
     private final MessageRepository messageRepository;
     private final ChatMapper chatMapper;
 
-    public ChatRoomDto createChatRoom(Long loggedInMemberId, ChatRoomCreateRequestDto chatRoomCreateRequestDto) {
+    public ChatRoomInfoDto createChatRoom(ChatRoomCreateRequestDto chatRoomCreateRequestDto) {
 
         // 1. 로그인한 사용자의 ID로 Member 엔티티 조회
-        Member loggedInMember = memberRepository.findById(loggedInMemberId).orElseThrow(
-                () -> new RuntimeException("cannot find member with id : " + loggedInMemberId)
+        Member loggedInMember = memberRepository.findById(chatRoomCreateRequestDto.getRequesterId()).orElseThrow(
+                () -> new RuntimeException("cannot find member with id : " + chatRoomCreateRequestDto.getRequesterId())
         );
 
         // 2. 요청 DTO로부터 참여자 ID 목록 추출
@@ -58,12 +56,13 @@ public class ChatService {
         });
 
         // 6. 채팅방 이름 생성
-        String title = chatRoomCreateRequestDto.getTitle().isEmpty() ? makeDefaultChatRoomTitle(participants) : chatRoomCreateRequestDto.getTitle() ;
+        String title = chatRoomCreateRequestDto.getTitle();
+        if (title == null || title.isEmpty())
+            title = makeDefaultChatRoomTitle(participants);
+
 
         // 7. ChatRoom 엔티티 생성
-        ChatRoom chatRoom = ChatRoom.builder()
-                .title(title)
-                .build();
+        ChatRoom chatRoom = new ChatRoom(title);
 
 
         // 8. 각 참여자에 대해 MemberChatRoom 엔티티 생성 및 저장
@@ -73,7 +72,7 @@ public class ChatService {
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
 
         // 10. ChatRoom 엔티티를 DTO로 변환하여 반환
-        return chatMapper.chatRoomToChatRoomDto(savedChatRoom);
+        return chatMapper.chatRoomToChatRoomInfoDto(savedChatRoom);
     }
 
     private String makeDefaultChatRoomTitle(Set<Member> participants) {
@@ -84,8 +83,8 @@ public class ChatService {
     public MessageDto sendMessage(MessageRequestDto messageRequestDto) {
 
         // 1. 로그인한 사용자의 ID로 Member 엔티티 조회
-        Member loggedInMember = memberRepository.findById(messageRequestDto.getMemberId()).orElseThrow(
-                () -> new RuntimeException("cannot find member with id : " + messageRequestDto.getMemberId())
+        Member loggedInMember = memberRepository.findById(messageRequestDto.getRequesterId()).orElseThrow(
+                () -> new RuntimeException("cannot find member with id : " + messageRequestDto.getRequesterId())
         );
 
         // 2. 채팅방 ID로 ChatRoom 엔티티 조회
@@ -151,42 +150,25 @@ public class ChatService {
 
         List<ChatRoomSummaryDto> chatRoomSummaryDtoList = new ArrayList<>();
         // 2. 회원이 참여하고 있는 채팅방 조회
+
         for (MemberChatRoom mcr : loggedInMember.getMemberChatRooms()) {
-
-            ChatRoomSummaryDto chatRoomSummaryDto = new ChatRoomSummaryDto();
-            List<String> participantsName = new ArrayList<>();
-            ChatRoom chatRoom = mcr.getChatRoom();
-
-            // 2-1. 해당 채팅방의 참여자 이름 조회
-            for(MemberChatRoom mcr2 : chatRoom.getMemberChatRooms()) {
-                participantsName.add(mcr2.getMember().getName());
-            }
-
-            // 2-2 chatRoomSummaryDto 생성
-            chatRoomSummaryDto.setId(chatRoom.getId());
-            chatRoomSummaryDto.setParticipantsName(participantsName);
-            chatRoomSummaryDto.setTitle(chatRoom.getTitle());
-            if (chatRoom.getLastMessage() != null) {
-                chatRoomSummaryDto.setLastMessage(chatRoom.getLastMessage().getContents());
-                chatRoomSummaryDto.setLastMessageTime(chatRoom.getLastMessage().getCreatedAt());
-            }
-            chatRoomSummaryDtoList.add(chatRoomSummaryDto);
+            chatRoomSummaryDtoList.add(chatMapper.chatRoomToChatRoomSummaryDto(mcr.getChatRoom()));
         }
 
         return chatRoomSummaryDtoList;
     }
 
-    public List<Member> getMembers() {
-        return memberRepository.findAll();
+    public List<MemberInfoDto> getMembers() {
+        return memberRepository.findAll().stream().map(chatMapper::memberToMemberInfoDto).toList();
     }
 
-    public ChatRoomDto getChatRoomById(Long chatRoomId) {
+    public ChatRoomDetailDto getChatRoomById(Long chatRoomId) {
         // 채팅방 ID로 ChatRoom 엔티티 조회
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
                 () -> new RuntimeException("cannot find chat room with id : " + chatRoomId)
         );
 
-        return chatMapper.chatRoomToChatRoomDto(chatRoom);
+        return chatMapper.chatRoomToChatRoomDetailDto(chatRoom);
     }
 }
 
