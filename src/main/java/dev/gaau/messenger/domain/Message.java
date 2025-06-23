@@ -1,11 +1,9 @@
 package dev.gaau.messenger.domain;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -43,7 +41,6 @@ public class Message {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Builder
     public Message(String type, String contents) {
         this.type = type;
         this.contents = contents;

@@ -11,13 +11,13 @@
 
 <!-- 상단 헤더 -->
 <header class="bg-white shadow-md p-4 flex items-center">
-    <a href="/view/chat" class="text-blue-500 hover:underline mr-4">&larr; 목록으로</a>
-    <h1 class="text-xl font-semibold" th:text="${chatRoom.title}">채팅방 이름</h1>
+    <a href="/view/chats/list" class="text-blue-500 hover:underline mr-4">&larr; 목록으로</a>
+    <h1 class="text-xl font-semibold" th:text="${chatRoom.chatRoomInfo.title}">채팅방 이름</h1>
 </header>
 
 <!-- 메시지 영역 -->
 <main id="message-list" class="flex-1 overflow-y-auto p-6 space-y-4">
-    <div th:each="msg : ${messages}">
+    <div th:each="msg : ${chatRoom.messages}">
         <!-- 내 메시지 -->
         <div th:if="${msg.memberId} == ${loggedInMemberId}"
              class="max-w-xs bg-blue-500 text-white p-3 rounded-lg rounded-tr-none mr-0 mb-2 ml-auto">
@@ -52,7 +52,7 @@
 
 <script th:inline="javascript">
 
-    var chatRoomId = [[${chatRoom.id}]];
+    var chatRoomId = [[${chatRoom.chatRoomInfo.id}]];
     var loggedInMemberId = [[${loggedInMemberId}]];
 
     const stompClient = new StompJs.Client({
@@ -65,8 +65,11 @@
 
     stompClient.onConnect = (frame) => {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/chat/room/' + chatRoomId, (message) => {
+        stompClient.subscribe('/topic/chats/' + chatRoomId, (message) => {
             var msgMemberId = JSON.parse(message.body).memberId;
+
+            console.log(msgMemberId);
+            console.log(loggedInMemberId);
 
             if (msgMemberId === loggedInMemberId) {
                 showMyMessage(JSON.parse(message.body).contents);
@@ -98,8 +101,8 @@
     function sendMessage() {
         console.log("messageSent");
         stompClient.publish({
-            destination: "/pub/chat/message",
-            body: JSON.stringify({  memberId: loggedInMemberId,
+            destination: "/pub/chats/message",
+            body: JSON.stringify({  requesterId: loggedInMemberId,
                                     chatRoomId : chatRoomId,
                                     type : "USER",
                                     contents: $("#new-message").val()})

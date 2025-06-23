@@ -4,8 +4,7 @@ import dev.gaau.messenger.domain.ChatRoom;
 import dev.gaau.messenger.domain.Member;
 import dev.gaau.messenger.domain.Message;
 import dev.gaau.messenger.dto.request.MessageRequestDto;
-import dev.gaau.messenger.dto.response.ChatRoomDto;
-import dev.gaau.messenger.dto.response.MessageDto;
+import dev.gaau.messenger.dto.response.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,36 +12,72 @@ import java.util.List;
 @Component
 public class ChatMapper {
 
-    public ChatRoomDto chatRoomToChatRoomDto(ChatRoom chatRoom) {
-
-        List<Long> participantsId = chatRoom.getMemberChatRooms().stream().map(
-                memberChatRoom -> memberChatRoom.getMember().getId()
-        ).toList();
-
-        return ChatRoomDto.builder()
-                .id(chatRoom.getId())
-                .createdAt(chatRoom.getCreatedAt())
-                .title(chatRoom.getTitle())
-                .participantsId(participantsId)
-                .build();
-    }
-
     public Message messageRequestDtoToMessage(MessageRequestDto messageRequestDto) {
-        return Message.builder()
-                .type(messageRequestDto.getType())
-                .contents(messageRequestDto.getContents())
-                .build();
+        return new Message(
+                messageRequestDto.getType(),
+                messageRequestDto.getContents()
+        );
     }
 
     public MessageDto messageToMessageDto(Message message) {
-        return MessageDto.builder()
-                .id(message.getId())
-                .type(message.getType())
-                .contents(message.getContents())
-                .createdAt(message.getCreatedAt())
-                .chatRoomId(message.getChatRoom().getId())
-                .memberId(message.getMember().getId())
-                .readCount(message.getChatRoom().getMemberChatRooms().size())
-                .build();
+        return new MessageDto(
+                message.getId(),
+                message.getType(),
+                message.getCreatedAt(),
+                message.getUnreadCount(),
+                message.getContents(),
+                message.getChatRoom().getId(),
+                message.getMember().getId()
+        );
+    }
+
+    public MemberInfoDto memberToMemberInfoDto(Member member) {
+        return new MemberInfoDto(
+                member.getId(),
+                member.getUsername(),
+                member.getNickname()
+        );
+    }
+
+    public ChatRoomInfoDto chatRoomToChatRoomInfoDto(ChatRoom chatRoom) {
+
+        List<MemberInfoDto> memberInfos = chatRoom.getMemberChatRooms().stream().map(
+                mcr -> memberToMemberInfoDto(mcr.getMember())
+        ).toList();
+
+        return new ChatRoomInfoDto(
+                chatRoom.getId(),
+                chatRoom.getTitle(),
+                memberInfos
+        );
+    }
+
+    public ChatRoomSummaryDto chatRoomToChatRoomSummaryDto(ChatRoom chatRoom) {
+
+        if (chatRoom.getLastMessage() == null)
+            return new ChatRoomSummaryDto(
+                    chatRoomToChatRoomInfoDto(chatRoom),
+                    null
+            );
+
+        return new ChatRoomSummaryDto(
+                chatRoomToChatRoomInfoDto(chatRoom),
+                messageToMessageDto(chatRoom.getLastMessage())
+        );
+    }
+
+    public ChatRoomDetailDto chatRoomToChatRoomDetailDto(ChatRoom chatRoom) {
+
+        List<MemberInfoDto> memberInfos = chatRoom.getMemberChatRooms().stream().map(
+                mcr -> memberToMemberInfoDto(mcr.getMember())
+        ).toList();
+
+        List<MessageDto> messages = chatRoom.getMessages().stream().map(this::messageToMessageDto).toList();
+
+        return new ChatRoomDetailDto(
+                chatRoomToChatRoomInfoDto(chatRoom),
+                memberInfos,
+                messages
+        );
     }
 }

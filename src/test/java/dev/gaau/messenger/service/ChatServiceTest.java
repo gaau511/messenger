@@ -2,7 +2,7 @@ package dev.gaau.messenger.service;
 
 import dev.gaau.messenger.dto.request.ChatRoomCreateRequestDto;
 import dev.gaau.messenger.dto.request.MessageRequestDto;
-import dev.gaau.messenger.dto.response.ChatRoomDto;
+import dev.gaau.messenger.dto.response.ChatRoomInfoDto;
 import dev.gaau.messenger.dto.response.MessageDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,59 +24,59 @@ class ChatServiceTest {
 
     @Test
     void createChatRoom_ShouldSuccess() {
-        ChatRoomCreateRequestDto testDto = new ChatRoomCreateRequestDto("ChatRoom for test", List.of(2L, 3L));
-        ChatRoomDto chatRoomDto = chatService.createChatRoom(temporaryMemberId, testDto);
+        ChatRoomCreateRequestDto testDto = new ChatRoomCreateRequestDto("ChatRoom for test", temporaryMemberId, List.of(2L, 3L));
+        ChatRoomInfoDto chatRoomDto = chatService.createChatRoom(testDto);
         assertThat(chatRoomDto.getTitle()).isEqualTo("ChatRoom for test");
-        assertThat(chatRoomDto.getParticipantsId()).hasSize(3);
-        assertThat(chatRoomDto.getParticipantsId()).contains(temporaryMemberId, 2L, 3L);
+        assertThat(chatRoomDto.getParticipantInfos()).hasSize(3);
     }
 
     @Test
     void createChatRoom_ShouldSuccess_WhenTitleIsNull() {
-        ChatRoomCreateRequestDto testDto = new ChatRoomCreateRequestDto(null, List.of(2L, 3L));
-        ChatRoomDto chatRoomDto = chatService.createChatRoom(temporaryMemberId, testDto);
+        ChatRoomCreateRequestDto testDto = new ChatRoomCreateRequestDto(null, temporaryMemberId, List.of(2L, 3L));
+        ChatRoomInfoDto chatRoomDto = chatService.createChatRoom(testDto);
         assertThat(chatRoomDto.getTitle()).contains("Joe");
     }
 
     @Test
     void createChatRoom_ShouldFail_WhenMemberIsNotExist() {
-        ChatRoomCreateRequestDto testDto = new ChatRoomCreateRequestDto("ChatRoom for test", List.of(1000L, 1001L));
+        ChatRoomCreateRequestDto testDto = new ChatRoomCreateRequestDto("ChatRoom for test", temporaryMemberId, List.of(1000L, 1001L));
 
-        assertThatThrownBy(() -> chatService.createChatRoom(temporaryMemberId, testDto))
+        assertThatThrownBy(() -> chatService.createChatRoom(testDto))
                 .isInstanceOf(RuntimeException.class);
 
     }
 
     @Test
     void createChatRoom_ShouldCreateOneSetOfMcr() {
-        ChatRoomCreateRequestDto testDto = new ChatRoomCreateRequestDto("ChatRoom for test", List.of(2L, 3L));
-        ChatRoomDto chatRoomDto = chatService.createChatRoom(temporaryMemberId, testDto);
+        ChatRoomCreateRequestDto testDto = new ChatRoomCreateRequestDto("ChatRoom for test", temporaryMemberId, List.of(2L, 3L));
+        ChatRoomInfoDto chatRoomDto = chatService.createChatRoom(testDto);
     }
 
     @Test
     void sendMessage_ShouldSuccess() {
-        MessageRequestDto testDto = new MessageRequestDto("USER", "Hi! How are you doing?");
-        MessageDto messageDto = chatService.sendMessage(temporaryMemberId, temporaryRoomId, testDto);
-        assertThat(messageDto.getChatRoomId()).isEqualTo(temporaryRoomId);
+        MessageRequestDto testDto = new MessageRequestDto(temporaryMemberId, temporaryRoomId, "USER", "Hi! How are you doing?");
+        MessageDto messageDto = chatService.sendMessage(testDto);
+
+        assertThat(messageDto.getChatRoomInfo().getId()).isEqualTo(temporaryRoomId);
         assertThat(messageDto.getContents()).isEqualTo("Hi! How are you doing?");
-        assertThat(messageDto.getMemberId()).isEqualTo(temporaryMemberId);
-        assertThat(messageDto.getReadCount()).isEqualTo(3);
+        assertThat(messageDto.getMemberInfo().getId()).isEqualTo(temporaryMemberId);
+        assertThat(messageDto.getUnreadCount()).isEqualTo(3);
     }
 
     @Test
     void sendMessage_ShouldFail_WhenChatRoomIsNotExist() {
-        MessageRequestDto testDto = new MessageRequestDto("USER", "Hi! How are you doing?");
+        MessageRequestDto testDto = new MessageRequestDto(temporaryMemberId, 2000L, "USER", "Hi! How are you doing?");
         assertThatThrownBy(
-                () -> chatService.sendMessage(temporaryMemberId, 2000L, testDto)
+                () -> chatService.sendMessage(testDto)
         )
                 .isInstanceOf(RuntimeException.class);
     }
 
     @Test
     void sendMessage_ShouldFail_WhenSenderIsNotParticipant() {
-        MessageRequestDto testDto = new MessageRequestDto("USER", "Hi! How are you doing?");
+        MessageRequestDto testDto = new MessageRequestDto(4L, temporaryRoomId, "USER", "Hi! How are you doing?");
         assertThatThrownBy(
-                () -> chatService.sendMessage(4L, temporaryRoomId, testDto)
+                () -> chatService.sendMessage(testDto)
         )
                 .isInstanceOf(RuntimeException.class);
     }

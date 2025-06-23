@@ -23,7 +23,6 @@ public class MemberChatRoom {
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
 
-    @Builder
     public MemberChatRoom(Member member, ChatRoom chatRoom) {
         this.member = member;
         this.chatRoom = chatRoom;

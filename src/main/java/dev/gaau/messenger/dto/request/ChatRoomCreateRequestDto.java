@@ -8,12 +8,9 @@ import lombok.Setter;
 import java.util.List;
 
 @Getter
-@Setter
 @AllArgsConstructor
-@NoArgsConstructor
 public class ChatRoomCreateRequestDto {
-
     private String title;
-
+    private Long requesterId;
     private List<Long> memberIds;
 }
