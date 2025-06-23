@@ -64,7 +64,6 @@ public class Member {
         message.setMember(this);
     }
 
-:
     public Member(String username, String password, String name, String gender, String email, String nickname, LocalDate birth) {
         this.username = username;
         this.password = password;
