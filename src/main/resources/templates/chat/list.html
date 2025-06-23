@@ -16,7 +16,7 @@
 
   <div class="divide-y divide-gray-200">
     <div th:each="room : ${chatRooms}" class="py-4">
-      <a th:href="@{/view/chats/{id}(id=${room.chatRoomInfo.id})}" class="flex items-center hover:bg-gray-50 p-4 rounded-lg transition">
+      <a th:href="@{/view/chats/{chatRoomId}/{memberId}(chatRoomId=${room.chatRoomInfo.id}, memberId=${memberId})}" class="flex items-center hover:bg-gray-50 p-4 rounded-lg transition">
         <!-- 채팅방 정보 -->
         <div class="flex-1">
           <div class="flex justify-between items-center">

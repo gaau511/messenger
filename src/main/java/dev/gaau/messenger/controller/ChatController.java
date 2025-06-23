@@ -21,11 +21,12 @@ public class ChatController {
 
     private final ChatService chatService;
 
-    @GetMapping
+    @GetMapping("/list/{memberId}")
     public String lookUpChatRoomList(Model model,
                                      @PathVariable("memberId") Long memberId) {
         List<ChatRoomSummaryDto> chatRooms = chatService.getChatRoomsByMemberId(memberId);
         model.addAttribute("chatRooms", chatRooms);
+        model.addAttribute("memberId", memberId);
         return "chat/list";
     }
 

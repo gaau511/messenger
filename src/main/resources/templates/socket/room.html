@@ -11,8 +11,8 @@
 
 <!-- 상단 헤더 -->
 <header class="bg-white shadow-md p-4 flex items-center">
-    <a href="/view/chats" class="text-blue-500 hover:underline mr-4">&larr; 목록으로</a>
-    <h1 class="text-xl font-semibold" th:text="${chatRoom.title}">채팅방 이름</h1>
+    <a href="/view/chats/list" class="text-blue-500 hover:underline mr-4">&larr; 목록으로</a>
+    <h1 class="text-xl font-semibold" th:text="${chatRoom.chatRoomInfo.title}">채팅방 이름</h1>
 </header>
 
 <!-- 메시지 영역 -->
@@ -52,7 +52,7 @@
 
 <script th:inline="javascript">
 
-    var chatRoomId = [[${chatRoom.id}]];
+    var chatRoomId = [[${chatRoom.chatRoomInfo.id}]];
     var loggedInMemberId = [[${loggedInMemberId}]];
 
     const stompClient = new StompJs.Client({
@@ -66,9 +66,9 @@
     stompClient.onConnect = (frame) => {
         console.log('Connected: ' + frame);
         stompClient.subscribe('/topic/chats/' + chatRoomId, (message) => {
-            var msgMemberId = JSON.parse(message.body).memberId;
+            var msgRequesterId = JSON.parse(message.body).requesterId;
 
-            if (msgMemberId === loggedInMemberId) {
+            if (msgRequesterId === loggedInMemberId) {
                 showMyMessage(JSON.parse(message.body).contents);
             } else {
                 showOtherMessage(JSON.parse(message.body).contents);
