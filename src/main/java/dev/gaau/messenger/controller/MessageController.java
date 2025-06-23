@@ -21,7 +21,7 @@ public class MessageController {
     @MessageMapping("/chats/message")
     public void sendMessage(MessageRequestDto messageRequestDto) {
         MessageDto message = chatService.sendMessage(messageRequestDto);
-        template.convertAndSend("/topic/chats/" + message.getChatRoomInfo().getId(), message);
+        template.convertAndSend("/topic/chats/" + message.getChatRoomId(), message);
     }
 
 }

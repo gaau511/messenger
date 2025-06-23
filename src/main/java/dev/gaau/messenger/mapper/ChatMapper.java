@@ -26,8 +26,8 @@ public class ChatMapper {
                 message.getCreatedAt(),
                 message.getUnreadCount(),
                 message.getContents(),
-                chatRoomToChatRoomInfoDto(message.getChatRoom()),
-                memberToMemberInfoDto(message.getMember())
+                message.getChatRoom().getId(),
+                message.getMember().getId()
         );
     }
 

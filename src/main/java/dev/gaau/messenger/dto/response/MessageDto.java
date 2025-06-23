@@ -14,6 +14,6 @@ public class MessageDto {
     private LocalDateTime createdAt;
     private Integer unreadCount;
     private String contents;
-    private ChatRoomInfoDto chatRoomInfo;
-    private MemberInfoDto memberInfo;
+    private Long chatRoomId;
+    private Long memberId;
 }
